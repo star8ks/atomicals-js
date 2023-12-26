@@ -121,9 +121,9 @@ function logMiningProgressToConsole(
         }
         return;
     }
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
-    process.stdout.write(chalk.red(txid, " nonces: ", nonces));
+    process.stdout?.clearLine(0);
+    process.stdout?.cursorTo(0);
+    process.stdout?.write(chalk.red(txid, " nonces: ", nonces));
 }
 
 function printBitworkLog(bitworkInfo: BitworkInfo, commit?: boolean) {
@@ -1012,11 +1012,13 @@ export class AtomicalOperationBuilder {
                     this.bitworkInfoReveal?.ext as any
                 )
             ) {
-                process.stdout.clearLine(0);
-                process.stdout.cursorTo(0);
-                process.stdout.write(
-                    chalk.green(checkTxid, " nonces: " + noncesGenerated)
-                );
+                if (!this.options.disableMiningChalk) {
+                    process.stdout?.clearLine(0);
+                    process.stdout?.cursorTo(0);
+                    process.stdout?.write(
+                        chalk.green(checkTxid, " nonces: " + noncesGenerated)
+                    );
+                }
                 console.log(
                     "\nBitwork matches reveal txid! ",
                     revealTx.getId(),
