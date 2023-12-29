@@ -1958,7 +1958,7 @@ program.command('store-file')
   .argument('<filepath>', 'string')
   .argument('<givenFileName>', 'string')
   .option('--rbf', 'Whether to enable RBF for transactions.')
-  .option('--initialowner <string>', 'Initial owner wallet alias to mint the Atomical into')
+  .option('--funding <string>', 'Use wallet alias WIF key to be used for funding and change')     
   .option('--satsbyte <number>', 'Satoshis per byte in fees', '15')
   .option('--satsoutput <number>', 'Satoshis to put into output', '1000')
   .option('--bitworkc <string>', 'Whether to put any bitwork proof of work into the token mint. Applies to the commit transaction.')
@@ -1971,7 +1971,7 @@ program.command('store-file')
       const walletInfo = await validateWalletStorage();
       const config: ConfigurationInterface = validateCliInputs();
       const atomicals = new Atomicals(ElectrumApi.createClient(process.env.ELECTRUMX_PROXY_BASE_URL || ''));
-      let walletRecord = resolveWalletAliasNew(walletInfo, options.initialowner, walletInfo.primary);
+      let fundingRecord = resolveWalletAliasNew(walletInfo, options.funding, walletInfo.funding);
       let parentOwnerRecord = resolveWalletAliasNew(walletInfo, options.parentowner, walletInfo.primary);
       const result: any = await atomicals.mintDatInteractive({
         meta: options.meta,
@@ -1979,13 +1979,13 @@ program.command('store-file')
         init: options.init,
         satsbyte: parseInt(options.satsbyte, 10),
         satsoutput: parseInt(options.satsoutput, 10),
-        bitworkc: options.bitworkc,
+        bitworkc: options.bitworkc || getRandomBitwork4(),
         bitworkr: options.bitworkr,
         parent: options.parent,
         parentOwner: parentOwnerRecord,
         disableMiningChalk: options.disablechalk,
         rbf: options.rbf,
-      }, filepath, givenFileName, walletRecord.address, walletRecord.WIF, );
+      }, filepath, givenFileName, fundingRecord.address, fundingRecord.WIF);
       handleResultLogging(result);
     } catch (error) {
       console.log(error);
@@ -2008,7 +2008,6 @@ program.command('download')
     }
   });
 
-
 program.command('broadcast')
   .description('broadcast a rawtx')
   .option('--rawtx <string>', 'Rawtx')
@@ -2027,6 +2026,29 @@ program.command('broadcast')
       }
       const atomicals = new Atomicals(ElectrumApi.createClient(process.env.ELECTRUMX_PROXY_BASE_URL || ''));
       const result: any = await atomicals.broadcast(rawtx);
+      handleResultLogging(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  program.command('decodetx')
+  .description('Decode a tx')
+  .option('--rawtx <string>', 'Rawtx')
+  .option('--rawtxfile <string>', 'File path to the rawtx')
+  .action(async (options) => {
+    try {
+    
+      if (!options.rawtx && !options.rawtxfile) {
+        throw new Error("must specify either rawtx or rawtxfile")
+      }
+      let rawtx = options.rawtx;
+      if (!rawtx) {
+        rawtx = options.rawtxfile;
+        rawtx = await fileReader(rawtx, 'utf8');
+      }
+ 
+      const result: any = await Atomicals.decodeTx(rawtx);
       handleResultLogging(result);
     } catch (error) {
       console.log(error);
