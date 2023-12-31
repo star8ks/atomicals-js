@@ -995,6 +995,8 @@ export class AtomicalOperationBuilder {
             }
 
             const revealTx = psbt.extractTransaction();
+            console.log("\nPrint raw revealTx in case of broadcast failed", revealTx.toHex());
+
             const checkTxid = revealTx.getId();
             logMiningProgressToConsole(
                 performBitworkForRevealTx,
