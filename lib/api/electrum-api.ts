@@ -111,7 +111,7 @@ export class ElectrumApi implements ElectrumApiInterface {
         return new Promise((resolve, reject) => {
             let intervalId: any;
             const checkForUtxo = async () => {
-                console.log('...');
+                console.log('...', 'wait until utxo value >= satoshis:', satoshis);
                 try {
                     const response: any = await this.getUnspentAddress(address).catch((e) => {
                         console.error(e);
@@ -121,23 +121,28 @@ export class ElectrumApi implements ElectrumApiInterface {
                     for (const utxo of utxos) {
                         // Do not use utxos that have attached atomicals
                         if (hasAttachedAtomicals(utxo)) {
+                            console.log('hasAttachedAtomicals while checking UTXO, continue..')
                             continue;
                         }
                         // If the exact amount was requested, then only return if the exact amount is found
                         if (exactSatoshiAmount) {
                             if (utxo.value === satoshis) {
+                                console.log('get exactSatoshiAmount while checking UTXO, resolve utxo:', utxo)
                                 clearInterval(intervalId);
                                 resolve(utxo);
                                 return;
                             }
                         } else {
                             if (utxo.value >= satoshis) {
+                                console.log('resolve utxo:', utxo)
                                 clearInterval(intervalId);
                                 resolve(utxo);
                                 return;
                             }
                         }
                     }
+                    console.log('No utxo match exact satoshi amount or >= required satoshi.')
+                    console.log(`You need at lease one utxo >= ${satoshis} satoshis in ${address}`)
 
                 } catch (error) {
                     console.error(error);
