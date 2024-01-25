@@ -76,7 +76,6 @@ if (parentPort) {
         const fundingKeypairRaw = ECPair.fromWIF(fundingWIF);
         const fundingKeypair = getKeypairInfo(fundingKeypairRaw);
 
-        copiedData["args"]["nonce"] = Math.floor(Math.random() * 10000000);
         copiedData["args"]["time"] = Math.floor(Date.now() / 1000);
 
         let atomPayload = new AtomicalsPayload(copiedData);
@@ -202,12 +201,12 @@ if (parentPort) {
         if (finalSequence && finalSequence != -1) {
             // send a result or message back to the main thread
             console.log(
-                "got one finalCopyData:" + JSON.stringify(finalCopyData)
+                "Got one finalCopyData: " + JSON.stringify(finalCopyData)
             );
             console.log(
-                "got one finalPrelimTx:" + JSON.stringify(finalPrelimTx)
+                "Got one finalPrelimTx: " + finalPrelimTx.toString()
             );
-            console.log("got one finalSequence:" + JSON.stringify(sequence));
+            console.log("Got one finalSequence: " + JSON.stringify(sequence));
 
             parentPort!.postMessage({
                 finalCopyData,
